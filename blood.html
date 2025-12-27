@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SevaSetu - Donation Platform</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{
+--primary:#27ae60;--alert:#c0392b;--blood:#b71540;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,sans-serif}
+body{background:#f4f7f6}
+
+header{height:90vh;background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),
+url("https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=1600&auto=format&fit=crop");
+background-size:cover;display:flex;align-items:center;justify-content:center;color:white;text-align:center}
+header h1{font-size:3rem}
+
+.btn{padding:14px 30px;border:none;border-radius:30px;font-size:1rem;font-weight:700;cursor:pointer}
+.blood-btn{background:var(--blood);color:white}
+.red-btn{background:var(--alert);color:white}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px;padding:60px}
+.card{background:white;border-radius:15px;box-shadow:0 10px 25px rgba(0,0,0,.1);overflow:hidden}
+.card img{width:100%;height:220px;object-fit:cover}
+.card-body{padding:20px}
+
+#thankYouPopup{
+display:none;position:fixed;top:20px;right:20px;
+background:var(--primary);color:white;padding:15px 25px;
+border-radius:10px;font-weight:bold;z-index:5000;
+box-shadow:0 5px 15px rgba(0,0,0,.3)
+}
+
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,.85);z-index:4000}
+.modal-content{background:white;width:90%;max-width:500px;
+margin:8% auto;padding:30px;border-radius:15px}
+.close{float:right;font-size:28px;cursor:pointer}
+
+label{font-weight:600;margin-top:12px;display:block}
+input,select,textarea{
+width:100%;padding:10px;margin-top:5px;border-radius:8px;border:1px solid #ccc
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <h1>Turn Excess Into Happiness</h1><br>
+    <button class="btn blood-btn" onclick="openBloodForm()">Donate Blood</button>
+  </div>
+</header>
+
+<section class="grid">
+  <div class="card">
+    <img src="https://images.unsplash.com/photo-1615461066841-6116e61058f4">
+    <div class="card-body">
+      <h3>Urgent Blood Needed</h3>
+      <button class="btn blood-btn" onclick="openBloodForm()">I Can Donate</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://images.unsplash.com/photo-1605634289830-4e090df545b6">
+    <div class="card-body">
+      <h3>Flood Relief</h3>
+      <button class="btn red-btn" onclick="completeDonationFlow()">Send Relief</button>
+    </div>
+  </div>
+</section>
+
+<div id="thankYouPopup">❤️ Thank you for your donation!</div>
+
+<div id="bloodModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeBloodForm()">&times;</span>
+    <h2>🩸 Blood Donation Form</h2>
+
+    <form id="bloodForm">
+      <label>Name</label>
+      <input required>
+
+      <label>Age</label>
+      <input type="number" min="18" max="60" required>
+
+      <label>Gender</label>
+      <select required>
+        <option>Male</option><option>Female</option><option>Other</option>
+      </select>
+
+      <label>Blood Group</label>
+      <select required>
+        <option>O+</option><option>O-</option><option>A+</option><option>A-</option>
+        <option>B+</option><option>B-</option><option>AB+</option><option>AB-</option>
+      </select>
+
+      <label>Address</label>
+      <textarea required></textarea>
+
+      <label>Any disease affecting blood?</label>
+      <textarea>No</textarea>
+
+      <br><br>
+      <button class="btn blood-btn">Submit & Donate</button>
+    </form>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+const canvas=document.getElementById("confetti"),ctx=canvas.getContext("2d");
+canvas.width=innerWidth;canvas.height=innerHeight;
+let p=[];
+function Confetti(){
+this.x=Math.random()*canvas.width;
+this.y=Math.random()*canvas.height-canvas.height;
+this.r=Math.random()*6+4;
+this.dy=Math.random()*3+2;
+this.c=`hsl(${Math.random()*360},100%,50%)`
+}
+Confetti.prototype.draw=function(){
+ctx.fillStyle=this.c;ctx.beginPath();
+ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fill();
+}
+Confetti.prototype.update=function(){
+this.y+=this.dy;if(this.y>canvas.height)this.y=0;
+this.draw();
+}
+function startConfetti(){
+p=[];for(let i=0;i<150;i++)p.push(new Confetti());
+let t=setInterval(()=>{
+ctx.clearRect(0,0,canvas.width,canvas.height);
+p.forEach(x=>x.update())
+},20);
+setTimeout(()=>{clearInterval(t);ctx.clearRect(0,0,canvas.width,canvas.height)},3000);
+}
+
+function completeDonationFlow(){
+startConfetti();
+const pop=document.getElementById("thankYouPopup");
+pop.style.display="block";
+setTimeout(()=>pop.style.display="none",3000);
+}
+
+function openBloodForm(){document.getElementById("bloodModal").style.display="block"}
+function closeBloodForm(){document.getElementById("bloodModal").style.display="none"}
+
+document.getElementById("bloodForm").onsubmit=e=>{
+e.preventDefault();
+closeBloodForm();
+completeDonationFlow();
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SevaSetu - India's Donation Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #27ae60;      
+            --dark: #2c3e50;         
+            --bg: #f4f7f6;           
+            --alert: #c0392b;        
+            --animal: #d35400;       
+            --elderly: #8e44ad;      
+            --orphan: #16a085;       
+            --blood: #b71540;        
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg); color: #333; overflow-x: hidden; }
+        html { scroll-behavior: smooth; }
+
+        #confetti-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9999;
+        }
+
+        .disaster-banner {
+            background: var(--alert); color: white; padding: 10px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 2000;
+            animation: flash 2s infinite;
+        }
+        @keyframes flash { 0% {background:#c0392b;} 50% {background:#e74c3c;} 100% {background:#c0392b;} }
+        .pulse-icon { margin-right: 10px; animation: pulse 1s infinite; }
+        .btn-sos { background: white; color: var(--alert); border: none; padding: 5px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        .close-banner { cursor: pointer; margin-left: 20px; }
+
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.2rem 5%; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+        .logo span { color: var(--animal); } /* Indian Saffron touch */
+        .nav-links a { margin-left: 25px; text-decoration: none; color: #555; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
+        .btn-login { padding: 8px 20px; border: 2px solid var(--primary); border-radius: 20px; color: var(--primary); }
+
+        header {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=1600&auto=format&fit=crop');
+            background-size: cover; background-position: center;
+            height: 85vh; display: flex; align-items: center; justify-content: center; text-align: center; color: white;
+        }
+        .hero-content h1 { font-size: 3.5rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); }
+        .hero-btns button { padding: 15px 35px; font-size: 1.1rem; border: none; border-radius: 30px; margin: 10px; cursor: pointer; transition: 0.3s; }
+        .primary { background: var(--primary); color: white; }
+        .secondary { background: white; color: var(--dark); }
+        .stats-row { display: flex; gap: 30px; justify-content: center; margin-top: 40px; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 15px; flex-wrap: wrap; backdrop-filter: blur(5px); }
+
+        .filter-section { padding: 50px 5%; text-align: center; }
+        .filter-buttons { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 25px; }
+        .filter-btn {
+            padding: 10px 25px; border: none; border-radius: 30px; background: #e0e0e0; cursor: pointer;
+            font-size: 1rem; transition: 0.3s; display: flex; align-items: center; gap: 8px; font-weight: 600;
+        }
+        .filter-btn.active { background: var(--dark); color: white; transform: scale(1.1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .btn-disaster:hover, .btn-disaster.active { background: var(--alert); color: white; }
+        .btn-animal:hover, .btn-animal.active { background: var(--animal); color: white; }
+        .btn-elderly:hover, .btn-elderly.active { background: var(--elderly); color: white; }
+        .btn-orphan:hover, .btn-orphan.active { background: var(--orphan); color: white; }
+        .btn-blood:hover, .btn-blood.active { background: var(--blood); color: white; }
+
+        .feed-section { padding: 0 5% 60px; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+
+        .card {
+            background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease; display: none; border-top: 5px solid transparent;
+        }
+        .show { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.15); }
+
+        .filterDiv.disaster { border-color: var(--alert); }
+        .filterDiv.blood { border-color: var(--blood); }
+        .filterDiv.animal { border-color: var(--animal); }
+        
+        .card-media { height: 220px; position: relative; background: #000; }
+        .card-media img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+
+        .play-btn {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 55px; height: 55px; background: rgba(255,255,255,0.9); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s;
+        }
+        .play-btn:hover { transform: translate(-50%, -50%) scale(1.1); background: white; }
+        .badge-urgent { position: absolute; top: 15px; left: 15px; background: red; color: white; padding: 5px 12px; font-size: 0.75rem; font-weight: bold; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+
+        .card-body { padding: 25px; }
+        .category-tag { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; padding: 4px 10px; border-radius: 5px; letter-spacing: 0.5px; }
+        .tag-red { color: var(--alert); background: #fadbd8; }
+        .tag-orange { color: var(--animal); background: #fdebd0; }
+        .tag-purple { color: var(--elderly); background: #e8daef; }
+        .tag-teal { color: var(--orphan); background: #d1f2eb; }
+        .tag-blood { color: white; background: var(--blood); }
+
+        .btn-donate { width: 100%; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; margin-top: 15px; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .btn-donate:active { transform: scale(0.95); } 
+        .red-btn { background: var(--alert); }
+        .orange-btn { background: var(--animal); }
+        .purple-btn { background: var(--elderly); }
+        .teal-btn { background: var(--orphan); }
+        .blood-btn { background: var(--blood); }
+
+        .clickable-ngo { color: blue; cursor: pointer; text-decoration: underline; font-weight: 600; }
+
+        .leaderboard { text-align: center; padding: 60px 5%; background: white; }
+        .winners-podium { display: flex; justify-content: center; align-items: flex-end; gap: 20px; margin-top: 40px; flex-wrap: wrap; }
+        .winner { text-align: center; padding: 20px; border-radius: 15px; width: 220px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: white; position: relative; }
+        .avatar { width: 70px; height: 70px; background: #eee; border-radius: 50%; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; color: #555; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .gold { border: 3px solid gold; transform: scale(1.15); background: #fffdf0; z-index: 2; }
+        .silver { border: 3px solid silver; }
+        .bronze { border: 3px solid #cd7f32; }
+
+        .leaderboard-list { max-width: 600px; margin: 40px auto; text-align: left; }
+        .list-item { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #eee; font-weight: 500; background: white; transition: 0.2s; }
+        .list-item:hover { background: #f9f9f9; padding-left: 25px; }
+
+        .ad-banner { width: 90%; max-width: 800px; margin: 40px auto; padding: 30px; border: 2px dashed #bdc3c7; text-align: center; color: #7f8c8d; background: #ecf0f1; border-radius: 10px; }
+        
+        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
+        .modal-content { margin: 8% auto; padding: 0; width: 90%; max-width: 550px; text-align: center; background: white; border-radius: 15px; position: relative; overflow: hidden; animation: zoomIn 0.3s; }
+        @keyframes zoomIn { from {transform: scale(0.7); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+        
+        .ngo-profile-card { padding: 30px; border-top: 6px solid var(--primary); text-align: left; }
+        .video-placeholder { height: 350px; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; }
+        .close-modal { position: absolute; top: 10px; right: 20px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; z-index: 10; text-shadow: 0 0 5px black; }
+        .close-modal-dark { color: #333; text-shadow: none; }
+        
+        .ngo-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .ngo-logo { width: 70px; height: 70px; background: #f0f2f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+        .ngo-stats-row { display: flex; justify-content: space-between; background: #f8f9fa; padding: 15px; margin-bottom: 20px; border-radius: 10px; text-align: center;}
+        .n-stat strong { font-size: 1.2rem; color: var(--dark); display: block;}
+        .n-stat p { font-size: 0.8rem; color: #777; margin: 0; }
+
+        @media (max-width: 768px) {
+            .disaster-banner { font-size: 0.8rem; flex-direction: column; gap: 5px; text-align: center; }
+            .grid-container { grid-template-columns: 1fr; }
+            .stats-row { flex-direction: column; width: 90%; margin: 20px auto; }
+            .hero-content h1 { font-size: 2rem; }
+            .winners-podium { flex-direction: column; align-items: center; }
+            .gold { order: -1; margin-bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="disaster-banner" id="disasterBanner">
+        <div class="banner-content">
+            <i class="fas fa-exclamation-triangle pulse-icon"></i>
+            <span><strong>SOS ALERT:</strong> Flash Floods in Assam/Bihar. 500 Families need shelter immediately.</span>
+        </div>
+        <div>
+            <button class="btn-sos" onclick="window.location.href='sosdonations.html'">Donate Now</button>
+            <i class="fas fa-times close-banner" onclick="document.getElementById('disasterBanner').style.display='none'"></i>
+        </div>
+    </div>
+
+    <nav id="navbar">
+        <div class="logo">Seva<span>Setu</span></div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#feed">Requests</a>
+            <a href="#leaderboard">Heroes</a>
+            <a href="#" onclick="openNGO('All Partner NGOs')">Partners</a>
+            <a href="#" class="btn-login">Login</a>
+        </div>
+    </nav>
+
+    <header id="home">
+        <div class="hero-content">
+            <h1>Turn <span style="color: #ff9f43;">Excess</span> Into <span style="color: #2ecc71;">Happiness</span></h1>
+            <p>India's trusted platform connecting donors with verified poor families, orphans, and animals.<br>Your old things are someone's new treasure.</p>
+            <div class="hero-btns">
+                <button class="btn-main primary" onclick="window.location.href='donate.html'">Donate Item</button>
+                <button class="btn-main secondary">Request Help</button>
+            </div>
+            
+            <div class="stats-row">
+                <div class="stat"><strong>1,205</strong> Items Given</div>
+                <div class="stat"><strong>50+</strong> NGOs Verified</div>
+                <div class="stat"><strong>₹5L</strong> Sponsored</div>
+            </div>
+        </div>
+    </header>
+
+    <section class="filter-section" id="feed">
+        <div class="filter-header">
+            <h3>❤️ I want to support:</h3>
+            <p id="memoryText" style="color:#777; margin-top:5px;">Select a cause, we will remember your choice.</p>
+        </div>
+        <div class="filter-buttons" id="filterContainer">
+            <button class="filter-btn active" onclick="filterSelection('all')">Show All</button>
+            <button class="filter-btn btn-blood" onclick="filterSelection('blood')"><i class="fas fa-heartbeat"></i> Blood Donation</button>
+            <button class="filter-btn btn-disaster" onclick="filterSelection('disaster')"><i class="fas fa-house-damage"></i> Disaster</button>
+            <button class="filter-btn btn-animal" onclick="filterSelection('animal')"><i class="fas fa-paw"></i> Animals</button>
+            <button class="filter-btn btn-elderly" onclick="filterSelection('elderly')"><i class="fas fa-blind"></i> Old Age</button>
+            <button class="filter-btn btn-orphan" onclick="filterSelection('orphan')"><i class="fas fa-child"></i> Orphans</button>
+        </div>
+    </section>
+
+    <section class="feed-section">
+        <div class="grid-container">
+
+            <div class="card filterDiv blood">
+                <div class="card-media">
+                    <img src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=800&auto=format&fit=crop" alt="Blood Donation">
+                    <span class="badge badge-urgent" style="background: #b71540;">URGENT: 2 Units</span>
+                    <div class="play-btn" onclick="openVideo('Emergency Blood Appeal')"><i class="fas fa-play"></i></div>
+                </div>
+                <div class="card-body">
+                    <span class="category-tag tag-blood">Medical Emergency</span>
+                    <h3>Need O+ Blood Urgent</h3>
+                    <p>Patient: Rahul (8yrs). AIIMS Delhi, ICU Ward 4. Father is a daily wager.</p>
+                    <p style="font-size: 0.85rem; color:#c0392b; font-weight:bold;">Need within 4 Hours!</p>
+                    <p style="font-size:0.8rem; color:#666;">Verified by: <span class="clickable-ngo" onclick="openNGO('Rotary Blood Bank')">Rotary Blood Bank</span></p>
+                    <button class="btn-donate blood-btn" onclick="window.location.href='blood.html'">I Can Donate</button>
+                </div>
+            </div>
+
+            <div class="card filterDiv disaster">
+                <div class="card-media">
+                    <img src="https://images.unsplash.com/photo-1605634289830-4e090df545b6?q=80&w=800&auto=format&fit=crop" alt="Flood">
+                    <span class="badge badge-urgent">SOS URGENT</span>
+                    <div class="play-btn" onclick="openVideo('Bihar Flood Report')"><i class="fas fa-play"></i></div>
+                </div>
+                <div class="card-body">
+                    <span class="category-tag tag-red">Disaster Relief</span>
+                    <h3>Tarpaulins for Flood Victims</h3>
+                    <p>Village Rampur is underwater. 50 families are sleeping on the highway. Need tents.</p>
+                    <div style="background:#eee; height:8px; border-radius:4px; margin:10px 0;"><div style="background:var(--alert); width:70%; height:100%; border-radius:4px;"></div></div>
+                    <p style="font-size:0.8rem;">70% Goal Reached</p>
+                    <button class="btn-donate red-btn" onclick="triggerConfetti()">Send Relief Material</button>
+                </div>
+            </div>
+
+            <div class="card filterDiv animal">
+                <div class="card-media">
+                    <img src="https://images.unsplash.com/photo-1596733220556-9a25b1612708?q=80&w=800&auto=format&fit=crop" alt="Cow">
+                    <div class="play-btn" onclick="openVideo('Krishna Gaushala Tour')"><i class="fas fa-play"></i></div>
+                </div>
+                <div class="card-body">
+                    <span class="category-tag tag-orange">Animal Welfare</span>
+                    <h3>Fodder for 200 Cows</h3>
+                    <p>'Krishna Gaushala' (Vrindavan) has run out of green fodder. Help us feed them today.</p>
+                    <p style="font-size:0.8rem; color:#666;">Verified by: <span class="clickable-ngo" onclick="openNGO('Krishna Gaushala Trust')">Krishna Trust</span></p>
+                    <button class="btn-donate orange-btn" onclick="triggerConfetti()">Donate Fodder (₹500)</button>
+                </div>
+            </div>
+
+            <div class="card filterDiv elderly">
+                <div class="card-media">
+                    <img src="https://images.unsplash.com/photo-1529421308418-eab98863cee4?q=80&w=800&auto=format&fit=crop" alt="Elderly">
+                    <div class="play-btn" onclick="openVideo('Old Age Home Story')"><i class="fas fa-play"></i></div>
+                </div>
+                <div class="card-body">
+                    <span class="category-tag tag-purple">Elderly Care</span>
+                    <h3>Medicines & Warm Socks</h3>
+                    <p>Winter is hard for our 15 abandoned grandpas in 'Apna Ghar'. Need BP medicines & socks.</p>
+                    <button class="btn-donate purple-btn" onclick="triggerConfetti()">Sponsor Kit</button>
+                </div>
+            </div>
+
+             <div class="card filterDiv orphan">
+                <div class="card-media">
+                    <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop" alt="School">
+                    <div class="play-btn" onclick="openVideo('Village School Appeal')"><i class="fas fa-play"></i></div>
+                </div>
+                <div class="card-body">
+                    <span class="category-tag tag-teal">Orphans & Education</span>
+                    <h3>Class 9 Science Books</h3>
+                    <p>Orphanage 'Asha' (Mumbai) needs used text books for 5 children who want to become doctors.</p>
+                    <button class="btn-donate teal-btn" onclick="triggerConfetti()">Donate Books</button>
+                </div>
+            </div>
+            
+            <div class="card filterDiv disaster">
+                <div class="card-media">
+                    <img src="https://images.unsplash.com/photo-1594708767771-a7502209ff51?q=80&w=800&auto=format&fit=crop" alt="Food">
+                </div>
+                <div class="card-body">
+                    <span class="category-tag tag-red">Food Bank</span>
+                    <h3>Rice Bags for Daily Wagers</h3>
+                    <p>Construction workers near Sector 62 have no work. Need dry ration kits.</p>
+                    <button class="btn-donate red-btn" onclick="triggerConfetti()">Donate Rice</button>
+                </div>
+            </div>
+
+            <div class="card filterDiv animal">
+                <div class="card-media">
+                    <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=800&auto=format&fit=crop" alt="Dog">
+                </div>
+                <div class="card-body">
+                    <span class="category-tag tag-orange">Animal Welfare</span>
+                    <h3>Surgery for Injured Dog</h3>
+                    <p>Found 'Sheru' with a broken leg near Railway Station. Surgery cost ₹2000.</p>
+                    <button class="btn-donate orange-btn" onclick="triggerConfetti()">Donate ₹500</button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="leaderboard" id="leaderboard">
+        <h2>🏆 Top Kindness Heroes</h2>
+        <p>Join the Hall of Fame by donating today!</p>
+        
+        <div class="winners-podium">
+            <div class="winner silver">
+                <div class="avatar"><img src="https://i.pravatar.cc/150?img=12" alt="Silver"></div>
+                <h4 onclick="openNGO('Sharma Family')">Sharma Family</h4>
+                <p>Society Donor</p>
+                <p style="color:#7f8c8d; font-weight:bold;">1200 Pts</p>
+            </div>
+            <div class="winner gold">
+                <div class="crown" style="position:absolute; top:-20px; left:40%; font-size:2rem;">👑</div>
+                <div class="avatar"><img src="https://i.pravatar.cc/150?img=3" alt="Gold"></div>
+                <h4 onclick="openNGO('Rotary Club India')">Rotary Club</h4>
+                <p>Top Verifier</p>
+                <p style="color:#f39c12; font-weight:bold;">3500 Pts</p>
+            </div>
+            <div class="winner bronze">
+                <div class="avatar"><img src="https://i.pravatar.cc/150?img=59" alt="Bronze"></div>
+                <h4 onclick="openNGO('Amit Kumar')">Amit Kumar</h4>
+                <p>Individual</p>
+                <p style="color:#d35400; font-weight:bold;">900 Pts</p>
+            </div>
+        </div>
+
+        <div class="leaderboard-list">
+            <div class="list-item"><span>4. Priya Singh</span> <span>850 pts</span></div>
+            <div class="list-item"><span>5. Tech Solutions (CSR)</span> <span>800 pts</span></div>
+            <div class="list-item"><span>6. Rohan V.</span> <span>720 pts</span></div>
+        </div>
+    </section>
+
+    <div class="ad-banner">
+        <small>Sponsored Ad</small>
+        <h3>Space for Local Furniture Shop Ad</h3>
+        <p>Advertise here. Proceeds go to NGO logistics (Tempo expenses).</p>
+    </div>
+
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeVideo()">&times;</span>
+            <div class="video-placeholder">
+                <i class="fas fa-play-circle fa-4x" style="margin-bottom:20px;"></i>
+                <h2 id="videoTitle" style="color:white; padding:0 20px;">Loading Video...</h2>
+                <p style="color:#ccc;">(YouTube Video plays here in real project)</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="ngoModal" class="modal">
+        <div class="modal-content ngo-profile-card">
+            <span class="close-modal close-modal-dark" onclick="closeNGO()">&times;</span>
+            
+            <div class="ngo-header">
+                <div class="ngo-logo">🤝</div> 
+                <div>
+                    <h2 id="ngoName">Foundation Name</h2>
+                    <span style="color:var(--primary); font-weight:bold;"><i class="fas fa-check-circle"></i> Govt Verified</span>
+                </div>
+            </div>
+
+            <div class="ngo-stats-row">
+                <div class="n-stat"><strong>500+</strong><p>Helped</p></div>
+                <div class="n-stat"><strong>12</strong><p>Cities</p></div>
+                <div class="n-stat"><strong>4.8</strong><p>Rating</p></div>
+            </div>
+
+            <p style="color:#555; line-height:1.6; margin-bottom:20px;">
+                This organization has been working since 2015. They provide full transparency of where your donation goes.
+                <br><b>Focus Areas:</b> Disaster Management, Hunger, Education.
+            </p>
+
+            <button class="btn-donate red-btn" onclick="alert('Redirecting to Secure Payment Gateway...')">Donate Money via UPI</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("confetti-canvas");
+        const ctx = canvas.getContext("2d");
+        let confettiParticles = [];
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.size = Math.random() * 8 + 4;
+                this.speedY = Math.random() * 3 + 2;
+                this.speedX = Math.random() * 2 - 1;
+                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y > canvas.height) {
+                    this.y = 0 - this.size;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initConfetti() {
+            for (let i = 0; i < 150; i++) {
+                confettiParticles.push(new Particle());
+            }
+        }
+
+        let isConfettiRunning = false;
+        let animationId;
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < confettiParticles.length; i++) {
+                confettiParticles[i].update();
+                confettiParticles[i].draw();
+            }
+            animationId = requestAnimationFrame(animateConfetti);
+        }
+
+        function triggerConfetti() {
+            if(!isConfettiRunning) {
+                confettiParticles = [];
+                initConfetti();
+                animateConfetti();
+                isConfettiRunning = true;
+                setTimeout(() => {
+                    cancelAnimationFrame(animationId);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    isConfettiRunning = false;
+                    alert("Thank you for your kindness! ❤️");
+                }, 3000);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            let savedPref = localStorage.getItem("donationPref");
+            if (savedPref) {
+                filterSelection(savedPref);
+                document.getElementById('memoryText').innerText = "Welcome back! Showing: " + savedPref.toUpperCase();
+            } else {
+                filterSelection('all');
+            }
+        });
+
+        function filterSelection(category) {
+            var x = document.getElementsByClassName("card");
+            if (category !== 'all') localStorage.setItem("donationPref", category);
+
+            var btns = document.getElementsByClassName("filter-btn");
+            for (var i = 0; i < btns.length; i++) {
+                btns[i].classList.remove("active");
+                if(category == 'all' && i==0) btns[i].classList.add("active");
+                if(btns[i].classList.contains('btn-' + category)) btns[i].classList.add("active");
+            }
+
+            for (var i = 0; i < x.length; i++) {
+                removeClass(x[i], "show");
+                if (category == "all" || x[i].classList.contains(category)) {
+                    addClass(x[i], "show");
+                }
+            }
+        }
+
+        function addClass(element, name) {
+            var arr1 = element.className.split(" ");
+            var arr2 = name.split(" ");
+            for (var i = 0; i < arr2.length; i++) {
+                if (arr1.indexOf(arr2[i]) == -1) {element.className += " " + arr2[i];}
+            }
+        }
+
+        function removeClass(element, name) {
+            var arr1 = element.className.split(" ");
+            var arr2 = name.split(" ");
+            for (var i = 0; i < arr2.length; i++) {
+                while (arr1.indexOf(arr2[i]) > -1) {
+                    arr1.splice(arr1.indexOf(arr2[i]), 1);     
+                }
+            }
+            element.className = arr1.join(" ");
+        }
+
+        var videoModal = document.getElementById("videoModal");
+        var ngoModal = document.getElementById("ngoModal");
+
+        function openVideo(title) {
+            videoModal.style.display = "block";
+            document.getElementById("videoTitle").innerText = "Watching: " + title;
+        }
+        function closeVideo() { videoModal.style.display = "none"; }
+
+        function openNGO(name) {
+            ngoModal.style.display = "block";
+            document.getElementById("ngoName").innerText = name;
+        }
+        function closeNGO() { ngoModal.style.display = "none"; }
+
+        window.onclick = function(event) {
+            if (event.target == videoModal) videoModal.style.display = "none";
+            if (event.target == ngoModal) ngoModal.style.display = "none";
+        }
+    </script>
+</body>
+</html>

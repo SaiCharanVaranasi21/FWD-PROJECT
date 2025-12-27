@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donation Platform – Register</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: url("img2.jpeg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .register-container {
+      background: rgba(255, 255, 255, 0.92);
+      width: 420px;
+      padding: 35px;
+      border-radius: 18px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .icon {
+      text-align: center;
+      font-size: 40px;
+      margin-bottom: 10px;
+      color: #e74c3c;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    p {
+      text-align: center;
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 25px;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1.5px solid #ccc;
+      outline: none;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: #e74c3c;
+      box-shadow: 0 0 5px rgba(231, 76, 60, 0.4);
+    }
+
+    .error {
+      color: red;
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .register-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #e74c3c, #ff6b6b);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .register-btn:hover {
+      background: linear-gradient(135deg, #d63b2b, #e74c3c);
+    }
+
+    .extras {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 14px;
+    }
+
+    .extras a {
+      color: #e74c3c;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .extras a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="register-container">
+    <div class="icon">🤍</div>
+    <h2>Create Account</h2>
+    <p>Join us to support people in need</p>
+
+    <form id="registerForm">
+      <div class="input-group">
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="Enter your name" required>
+      </div>
+
+      <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="example@email.com">
+        <div class="error" id="emailError">Please enter a valid email address</div>
+      </div>
+
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Create password">
+      </div>
+
+      <div class="input-group">
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Re-enter password">
+        <div class="error" id="passwordError">Passwords do not match</div>
+      </div>
+
+      <div class="input-group">
+        <label>Role</label>
+        <select id="role">
+          <option value="">Select role</option>
+          <option>Donor</option>
+          <option>Recipient</option>
+          <option>Admin</option>
+        </select>
+      </div>
+
+      <button class="register-btn" type="submit">Register</button>
+    </form>
+
+    <div class="extras">
+      <p>Already have an account? <a href="login.html">Login</a></p>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("registerForm");
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirmPassword");
+    const emailError = document.getElementById("emailError");
+    const passwordError = document.getElementById("passwordError");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      let valid = true;
+
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailPattern.test(email.value)) {
+        emailError.style.display = "block";
+        email.style.borderColor = "red";
+        valid = false;
+      } else {
+        emailError.style.display = "none";
+        email.style.borderColor = "#e74c3c";
+      }
+
+      if (password.value.length < 6) {
+        alert("Password must be at least 6 characters");
+        valid = false;
+      }
+
+      if (password.value !== confirmPassword.value) {
+        passwordError.style.display = "block";
+        confirmPassword.style.borderColor = "red";
+        valid = false;
+      } else {
+        passwordError.style.display = "none";
+        confirmPassword.style.borderColor = "#e74c3c";
+      }
+
+      if (valid) {
+        alert("Registration Successful 🤍");
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+
+</body>
+</html>

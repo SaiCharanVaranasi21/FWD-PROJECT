@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flood Relief – Assam & Bihar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f6;
+      color: #333;
+    }
+
+    header {
+      background: #c0392b;
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.1rem;
+    }
+
+    .content {
+      padding: 50px 8%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .images img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    }
+
+    .donation-form {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .donation-form h2 {
+      margin-bottom: 15px;
+      color: #c0392b;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #c0392b;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #a93226;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: white;
+      color: #777;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Flood Relief – Assam & Bihar</h1>
+    <p>Thousands of families are affected by floods. Your support can save lives.</p>
+  </header>
+
+  <section class="content">
+
+    <div class="images">
+      <img src="img3.jpg" alt="Assam flood rescue">
+      <img src="img4.jpeg" alt="Bihar flood victims">
+      <img src="img5.jpg" alt="Flooded villages">
+    </div>
+
+    <div class="donation-form">
+      <h2>Donate for Flood Victims</h2>
+
+      <form onsubmit="submitDonation(event)">
+        <label>Full Name</label>
+        <input type="text" required>
+
+        <label>Email Address</label>
+        <input type="email" required>
+
+        <label>Donation Type</label>
+        <select required>
+          <option value="">Select</option>
+          <option>Money</option>
+          <option>Food</option>
+          <option>Clothes</option>
+          <option>Medicines</option>
+        </select>
+
+        <label>Donation Amount (₹)</label>
+        <input type="number" placeholder="Enter amount" required>
+
+        <button type="submit">Confirm Donation</button>
+      </form>
+    </div>
+
+  </section>
+
+  <footer>
+    © 2025 SevaSetu | Assam & Bihar Flood Relief
+  </footer>
+
+  <script>
+    function submitDonation(e) {
+      e.preventDefault();
+      alert("Thank you for donating! Your support means a lot ❤️");
+    }
+  </script>
+
+</body>
+</html>
